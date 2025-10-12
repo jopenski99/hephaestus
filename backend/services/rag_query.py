@@ -24,9 +24,9 @@ class RAGQueryEngine:
         scores = results["distances"][0]
 
         # Step 3: Display results
-        print(f"\n📊 Top {n_results} relevant chunks:\n")
-        for i, (doc, score) in enumerate(zip(docs, scores)):
-            print(f"{i+1}. Score: {score:.4f}\n{doc[:300]}...\n")
+        #print(f"\n📊 Top {n_results} relevant chunks:\n")
+        #for i, (doc, score) in enumerate(zip(docs, scores)):
+        #    print(f"{i+1}. Score: {score:.4f}\n{doc[:300]}...\n")
 
         return docs
 

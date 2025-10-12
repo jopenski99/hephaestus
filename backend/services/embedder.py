@@ -5,7 +5,7 @@ from typing import List
 import numpy as np
 
 class Embedder:
-    def __init__(self, model_name: str = "all-MiniLM-L6-v2"):
+    def __init__(self, model_name: str = "all-mpnet-base-v2"):
         """
         Initializes a small, fast embedding model.
         """
@@ -16,7 +16,6 @@ class Embedder:
         """
         Takes a list of text chunks and returns a matrix of embeddings.
         """
-        print(texts)
         print(f"🧠 Generating embeddings for {len(texts)} chunks...")
         embeddings = self.model.encode(texts, show_progress_bar=True, convert_to_numpy=True)
         print(f"✅ Generated embeddings of shape: {embeddings.shape}")

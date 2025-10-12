@@ -1,31 +1,24 @@
 import requests
-import json
 
 class LLMClient:
-    def query_llm(context: str, question: str) -> str:
-        """
-        Sends a context-augmented prompt to the local LLM (Ollama or API).
-        """
-        prompt = f"""You are a helpful assistant. 
-        Use the context below to answer the user's question accurately.
+    def __init__(self, base_url="http://localhost:11434"):
+        self.base_url = base_url
 
-        Context:
-        {context}
+    def query_llm(self, context: str, question: str) -> str:
+        print(f"🔎 Querying LLM with context: “{context}” and question: “{question}”")
+        messages = [
+            {"role": "system", "content": "You are a helpful assistant. Use the context to answer accurately."},
+            {"role": "user", "content": f"Context:\n{context}\n\nQuestion:\n{question}"}
+        ]
 
-        Question:
-        {question}
-
-        Answer:"""
-
-        # Example: call Ollama API
         response = requests.post(
-            "http://localhost:11434/api/generate",
-            json={"model": "mistral", "prompt": prompt, "stream": False}
+            self.base_url + "/api/chat",
+            json={"model": "phi3:mini", "messages": messages, "stream": False}
         )
 
         if response.status_code == 200:
             data = response.json()
-            return data.get("response", "No response from model.")
+            message = data.get("message", {})
+            return message.get("content", "No response from model.")
         else:
             return f"Error from LLM API: {response.text}"
-

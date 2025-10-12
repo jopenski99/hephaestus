@@ -10,15 +10,15 @@ class ChromaVectorStore:
     def __init__(self):
         # Define absolute persistent path
         db_path = Path(__file__).resolve().parent.parent / "data/vector_db"
-        print(f"📦 Using Chroma DB at: {db_path}")
+        #print(f"📦 Using Chroma DB at: {db_path}")
         db_path.mkdir(parents=True, exist_ok=True)
 
         # ✅ Use PersistentClient (NOT Client)
         self.client = chromadb.PersistentClient(path=str(db_path))
-        print(f"📦 Chroma Persistent DB initialized at: {db_path}")
+        #print(f"📦 Chroma Persistent DB initialized at: {db_path}")
 
         # Use consistent collection name
-        self.collection = self.client.get_or_create_collection(name="knowledge")
+        self.collection = self.client.get_or_create_collection(name="mpnet-embeddings")
 
     def add_documents(self, texts, embeddings):
         """Adds text chunks and their embeddings into Chroma."""
@@ -38,9 +38,9 @@ class ChromaVectorStore:
             n_results=n_results
         )
         docs = results["documents"][0]
-        print(f"\n🔍 Top {n_results} results for: “{query_text}”\n")
-        for i, d in enumerate(docs):
-            print(f"Result {i+1}: {d[:150]}...\n")
+        #print(f"\n🔍 Top {n_results} results for: “{query_text}”\n")
+        #for i, d in enumerate(docs):
+        #    print(f"Result {i+1}: {d[:150]}...\n")
         return docs
 
     def show_all_documents(self, limit: int = 5):

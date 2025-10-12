@@ -32,6 +32,10 @@ class PDFParser:
     def clean_text(self, text: str) -> str:
         """Clean and normalize extracted text."""
         text = re.sub(r'\s+', ' ', text)  # replace multiple spaces/newlines with single space
+        text = re.sub(r'0{3,}', '', text)
+        text = re.sub(r'(?<=\w)\.(?=\w)', '', text)  # replace multiple newlines with single newline
+        text = re.sub(r'[○]', '', text)
+        text += text +"\n"
         return text.strip()
 
     def chunk_text(self, text: str, chunk_size: int = 250, overlap: int = 50) -> List[str]:

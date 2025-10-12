@@ -3,7 +3,7 @@
 from fastapi import FastAPI, Query, File, UploadFile
 from pathlib import Path
 import shutil
-import json
+
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from backend.services.pdf_parser import PDFParser
@@ -39,10 +39,13 @@ def query_knowledge(
     n_results: int = Query(3, description="Number of top matching chunks")
 ):
     """Query the vector database for relevant information."""
-    docs = rag_engine.query(question, n_results)
-    context = "\n\n".join(docs)
-    answer = llm.query_llm(context, question)
-    return {"question": question, "results": docs, "answer": answer}
+    try:
+        docs = rag_engine.query(question, n_results)
+        context = "\n\n".join(docs)
+        answer = llm.query_llm(context, question)
+    except Exception as e:
+        return {"error": str(e)}
+    return {"question": question,  "answer": answer}
 
 @app.post("/upload")
 async def upload_pdf(file: UploadFile = File(...)):
@@ -59,7 +62,17 @@ async def upload_pdf(file: UploadFile = File(...)):
         "message": "✅ File processed, embedded, and moved to for_dispose."
     }
 
-
+@app.post("/immediate_process")
+async def immediate_process():
+        """Endpoint to trigger immediate processing of pending PDFs."""
+        try:
+            data = parser.process_pending_pdfs()
+            return {
+                "message": "✅ Processed pending PDFs and moved to for_dispose.",
+                "data": data
+            }
+        except Exception as e:
+            return {"error": str(e)}
  
     
 # === Scheduled PDF Processor ===
