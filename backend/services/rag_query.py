@@ -1,11 +1,12 @@
 from backend.services.vector_store import ChromaVectorStore
 from sentence_transformers import SentenceTransformer
 import numpy as np
+from dotenv import load_dotenv
 
 class RAGQueryEngine:
     def __init__(self):
         print("🚀 Initializing RAG Query Engine...")
-        self.embedder = SentenceTransformer("all-MiniLM-L6-v2")
+        self.embedder = SentenceTransformer("all-mpnet-base-v2")
         self.store = ChromaVectorStore()
 
     def query(self, question: str, n_results: int = 3):

@@ -19,7 +19,13 @@ class ChromaVectorStore:
 
         # Use consistent collection name
         self.collection = self.client.get_or_create_collection(name="mpnet-embeddings")
-
+        print(f"📦 Using collection: {self.collection.name}")
+    def clear_collection(self):
+        """Deletes all documents in the collection."""
+        self.client.delete_collection(name="mpnet-embeddings")
+        self.collection = self.client.get_or_create_collection(name="mpnet-embeddings")
+        print("🗑️ Cleared all documents from vector store.")
+    
     def add_documents(self, texts, embeddings):
         """Adds text chunks and their embeddings into Chroma."""
         ids = [str(uuid.uuid4()) for _ in texts]
@@ -38,9 +44,9 @@ class ChromaVectorStore:
             n_results=n_results
         )
         docs = results["documents"][0]
-        #print(f"\n🔍 Top {n_results} results for: “{query_text}”\n")
-        #for i, d in enumerate(docs):
-        #    print(f"Result {i+1}: {d[:150]}...\n")
+        print(f"\n🔍 Top {n_results} results for: “{query_text}”\n")
+        for i, d in enumerate(docs):
+            print(f"Result {i+1}: {d[:150]}...\n")
         return docs
 
     def show_all_documents(self, limit: int = 5):

@@ -1,6 +1,8 @@
 # backend/api/main.py
 
-from fastapi import FastAPI, Query, File, UploadFile
+from fastapi import APIRouter, Request, FastAPI, Query, File, UploadFile
+from fastapi.responses import StreamingResponse, JSONResponse
+import json
 from pathlib import Path
 import shutil
 
@@ -17,6 +19,8 @@ app = FastAPI(title="Hephaestus RAG API")
 # Initialize RAG engine once at startup
 rag_engine = RAGQueryEngine()
 
+router = APIRouter()
+
 # === Directories ===
 UPLOAD_DIR = Path("backend/data/knowledge_files")
 DISPOSE_DIR = Path("backend/data/for_dispose")
@@ -32,7 +36,11 @@ llm = LLMClient()
 @app.get("/")
 def root():
     return {"message": "Hephaestus RAG API is running 🚀"}
-
+@app.get("/test-relevance")
+def test_relevance():
+    question = "Where is the toolkit located?"
+    docs = rag_engine.query(question, n_results=3)
+    return {"question": question, "relevant_docs": docs}
 @app.get("/query")
 def query_knowledge(
     question: str = Query(..., description="Your natural language question"),
@@ -46,6 +54,21 @@ def query_knowledge(
     except Exception as e:
         return {"error": str(e)}
     return {"question": question,  "answer": answer}
+
+@app.post("/query/stream")
+async def stream_query(request: Request):
+    body = await request.json()
+    print(body)
+    question = body.get("question", "")
+
+    docs = rag_engine.query(question, 3)
+    context = "\n\n".join(docs)
+
+    def generate():
+        for token in llm.stream_llm(context, question):
+            yield token
+
+    return StreamingResponse(generate(), media_type="text/plain")
 
 @app.post("/upload")
 async def upload_pdf(file: UploadFile = File(...)):
@@ -74,6 +97,14 @@ async def immediate_process():
         except Exception as e:
             return {"error": str(e)}
  
+@app.post("/clear_vector_store")
+def clear_vector_store():
+    """Endpoint to clear all documents from the vector store."""
+    try:
+        store.clear_collection()
+        return {"message": "🗑️ Cleared all documents from vector store."}
+    except Exception as e:
+        return {"error": str(e)}
     
 # === Scheduled PDF Processor ===
 def process_pending_pdfs():

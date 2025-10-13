@@ -3,7 +3,7 @@
 from sentence_transformers import SentenceTransformer
 from typing import List
 import numpy as np
-
+from dotenv import load_dotenv
 class Embedder:
     def __init__(self, model_name: str = "all-mpnet-base-v2"):
         """
@@ -19,7 +19,7 @@ class Embedder:
         print(f"🧠 Generating embeddings for {len(texts)} chunks...")
         embeddings = self.model.encode(texts, show_progress_bar=True, convert_to_numpy=True)
         print(f"✅ Generated embeddings of shape: {embeddings.shape}")
-        return embeddings
+        return embeddings.reshape(-1, 768)
 
 
 if __name__ == "__main__":

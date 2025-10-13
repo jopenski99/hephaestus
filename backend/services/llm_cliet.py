@@ -1,5 +1,5 @@
 import requests
-
+import json
 class LLMClient:
     def __init__(self, base_url="http://localhost:11434"):
         self.base_url = base_url
@@ -22,3 +22,31 @@ class LLMClient:
             return message.get("content", "No response from model.")
         else:
             return f"Error from LLM API: {response.text}"
+    def stream_llm(self, context: str, question: str):
+        """
+        Streams response tokens from Ollama as they are generated.
+        """
+        prompt = f"""You are a helpful assistant.
+            Use the context below to answer accurately.
+            
+            Context:
+            {context}
+            
+            Question:
+            {question}
+            
+            Answer:"""
+          
+        response = requests.post(
+            f"{self.base_url}/api/chat",
+            json={"model": "phi3:mini", "prompt": prompt, "stream": True},
+            stream=True,
+        )
+
+        for line in response.iter_lines():
+            if line:
+                data = json.loads(line.decode("utf-8"))
+                if "message" in data and "content" in data["message"]:
+                    yield data["message"]["content"]
+                if data.get("done"):
+                    break
