@@ -22,31 +22,36 @@ class LLMClient:
             return message.get("content", "No response from model.")
         else:
             return f"Error from LLM API: {response.text}"
+    
     def stream_llm(self, context: str, question: str):
         """
-        Streams response tokens from Ollama as they are generated.
+        Streams tokens from Ollama's chat API.
         """
         prompt = f"""You are a helpful assistant.
-            Use the context below to answer accurately.
-            
-            Context:
-            {context}
-            
-            Question:
-            {question}
-            
-            Answer:"""
-          
-        response = requests.post(
-            f"{self.base_url}/api/chat",
-            json={"model": "phi3:mini", "prompt": prompt, "stream": True},
-            stream=True,
-        )
+        Use the context below to answer the user's question accurately.
 
-        for line in response.iter_lines():
-            if line:
-                data = json.loads(line.decode("utf-8"))
-                if "message" in data and "content" in data["message"]:
-                    yield data["message"]["content"]
-                if data.get("done"):
-                    break
+        Context:
+        {context}
+
+        Question:
+        {question}
+
+        Answer:"""
+
+        with requests.post(
+            f"{self.base_url}/api/chat",
+            json={"model": "phi3:mini", "messages": [{"role": "user", "content": prompt}]},
+            stream=True
+        ) as r:
+            r.raise_for_status()
+            for line in r.iter_lines():
+                if line:
+                    try:
+                        data = json.loads(line.decode("utf-8"))
+                        if "message" in data and "content" in data["message"]:
+                            yield data["message"]["content"]
+                        elif data.get("done"):
+                            break
+                    except json.JSONDecodeError:
+                        continue
+                    

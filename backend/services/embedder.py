@@ -1,14 +1,20 @@
 # backend/services/embedder.py
 
+import os
+import numpy as np
 from sentence_transformers import SentenceTransformer
 from typing import List
-import numpy as np
 from dotenv import load_dotenv
+from pathlib import Path
+
+env_path = Path(__file__).resolve().parent.parent / ".env"
+load_dotenv(env_path)
 class Embedder:
-    def __init__(self, model_name: str = "all-mpnet-base-v2"):
-        """
-        Initializes a small, fast embedding model.
-        """
+    
+    
+    def __init__(self):
+        
+        model_name = os.getenv("EMBEDDER_MODEL_NAME")
         print(f"🔧 Loading embedding model: {model_name}")
         self.model = SentenceTransformer(model_name)
 

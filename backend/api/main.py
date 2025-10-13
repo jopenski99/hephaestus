@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter, Request, FastAPI, Query, File, UploadFile
 from fastapi.responses import StreamingResponse, JSONResponse
-import json
+
 from pathlib import Path
 import shutil
 
@@ -58,13 +58,13 @@ def query_knowledge(
 @app.post("/query/stream")
 async def stream_query(request: Request):
     body = await request.json()
-    print(body)
     question = body.get("question", "")
 
     docs = rag_engine.query(question, 3)
     context = "\n\n".join(docs)
 
     def generate():
+        print(f"🌐 Streaming response for question: {question}")
         for token in llm.stream_llm(context, question):
             yield token
 
