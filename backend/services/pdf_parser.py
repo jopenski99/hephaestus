@@ -32,9 +32,13 @@ class PDFParser:
     def clean_text(self, text: str) -> str:
         """Clean and normalize extracted text."""
         text = re.sub(r'\s+', ' ', text)  # replace multiple spaces/newlines with single space
+        text = re.sub(r'0{3,}', '', text)
+        text = re.sub(r'(?<=\w)\.(?=\w)', '', text)  # replace multiple newlines with single newline
+        text = re.sub(r'[○]', '', text)
+        text += text +"\n"
         return text.strip()
 
-    def chunk_text(self, text: str, chunk_size: int = 250, overlap: int = 50) -> List[str]:
+    def chunk_text(self, text: str, chunk_size: int = 600, overlap: int = 120) -> List[str]:
         """Split text into overlapping word chunks."""
         words = text.split()
         chunks = []
@@ -46,7 +50,7 @@ class PDFParser:
             start += chunk_size - overlap  # overlap between chunks
         return chunks
 
-    def process_pdf(self, pdf_path: str, chunk_size: int = 250) -> List[str]:
+    def process_pdf(self, pdf_path: str, chunk_size: int = 600) -> List[str]:
         """Extract, clean, and chunk a single PDF."""
         print(f"📄 Processing PDF: {pdf_path}")
         text = self.extract_text_from_pdf(pdf_path)

@@ -1,11 +1,19 @@
+import os
+import numpy as np
 from backend.services.vector_store import ChromaVectorStore
 from sentence_transformers import SentenceTransformer
-import numpy as np
+from dotenv import load_dotenv
+from pathlib import Path
 
+env_path = Path(__file__).resolve().parent.parent / ".env"
+load_dotenv(env_path)
 class RAGQueryEngine:
     def __init__(self):
+        
+        
+        model_name = os.getenv("EMBEDDER_MODEL_NAME")
         print("🚀 Initializing RAG Query Engine...")
-        self.embedder = SentenceTransformer("all-MiniLM-L6-v2")
+        self.embedder = SentenceTransformer(model_name)
         self.store = ChromaVectorStore()
 
     def query(self, question: str, n_results: int = 3):
@@ -24,9 +32,9 @@ class RAGQueryEngine:
         scores = results["distances"][0]
 
         # Step 3: Display results
-        print(f"\n📊 Top {n_results} relevant chunks:\n")
-        for i, (doc, score) in enumerate(zip(docs, scores)):
-            print(f"{i+1}. Score: {score:.4f}\n{doc[:300]}...\n")
+        #print(f"\n📊 Top {n_results} relevant chunks:\n")
+        #for i, (doc, score) in enumerate(zip(docs, scores)):
+        #    print(f"{i+1}. Score: {score:.4f}\n{doc[:300]}...\n")
 
         return docs
 
