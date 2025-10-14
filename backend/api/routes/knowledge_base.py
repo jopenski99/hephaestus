@@ -1,5 +1,8 @@
-from fastapi import APIRouter, Request, Query, UploadFile, File
+from fastapi import APIRouter, Request, UploadFile, File
+from backend.api.core.config import settings
 import shutil
+
+
 router = APIRouter(prefix="/knowledge_base", tags=["Intellectual Knowledge Base"])
 
 @router.post("/upload")
@@ -8,7 +11,7 @@ async def upload_pdf(file: UploadFile = File(...)):
     if not file.filename.lower().endswith(".pdf"):
         return {"error": "Only PDF files are supported."}
     
-    save_path = UPLOAD_DIR / file.filename
+    save_path = settings.UPLOAD_DIR / file.filename
     with open(save_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
    

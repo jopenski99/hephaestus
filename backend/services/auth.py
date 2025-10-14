@@ -1,8 +1,8 @@
-from fastapi import  Depends
-from sqlmodel import Session, select
+
+
 from datetime import datetime, timedelta
 from backend.models.user import User
-from backend.services.db import get_session
+from sqlmodel import Session, select
 from backend.api.core.config import settings
 from passlib.context import CryptContext
 from jose import jwt
@@ -23,7 +23,8 @@ def hash_password(password: str) -> str:
 def verify_password(plain: str, hashed: str) -> bool:
     return pwd_context.verify(plain, hashed)
 
-def login(username: str, password: str, expires_delta: timedelta | None = None, session: Session = Depends(get_session)):
+def login(username: str, password: str,session: Session, expires_delta: timedelta | None = None, ):
+    
     user = session.exec(select(User).where(User.username == username)).first()
     if not user or not verify_password(password, user.password_hash):
         return {"message": "Invalid credentials", "success": False}
@@ -32,11 +33,11 @@ def login(username: str, password: str, expires_delta: timedelta | None = None, 
     user_detail = { "username": user.username, "email": user.email}
     return { "data" : {"access_token": token, "token_type": "bearer", "user": user_detail }, "success": True }
 
-def get_all_users(session: Session = Depends(get_session)):
+def get_all_users(session: Session):
     users = session.exec(select(User)).all()
     return users
 
-def register(username: str, email: str,  password: str, session: Session = Depends(get_session), is_superuser: bool = False):
+def register(username: str, email: str,  password: str, session: Session, is_superuser: bool = False):
     try:
         user = session.exec(select(User).where(User.username == username)).first()
         if user:

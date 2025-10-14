@@ -16,9 +16,9 @@ def query_knowledge(
 ):
     """Query the vector database for relevant information."""
     try:
-        docs = request.app.state.servicesrag_engine.query(question, n_results)
+        docs = request.app.state.services.rag_engine.query(question, n_results)
         context = "\n\n".join(docs)
-        answer = llm.query_llm(context, question)
+        answer = request.app.state.services.llm.query_llm(context, question)
     except Exception as e:
         return {"error": str(e)}
     return {"question": question,  "answer": answer}
