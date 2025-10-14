@@ -1,0 +1,21 @@
+# docker-compose.yml
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: hephaestus-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: hephaestus_user
+      POSTGRES_PASSWORD: hephaestus_pass
+      POSTGRES_DB: hephaestus
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      # Uncomment if you have init scripts
+      # - ./backend/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+volumes:
+  pg_data:
