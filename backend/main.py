@@ -1,63 +1,85 @@
-# backend/main.py
+# backend/api/main.py
 
-from services.pdf_parser import process_pdf, process_pending_pdfs
-from services.embedder import Embedder
-from services.vector_store import ChromaVectorStore
+from fastapi import APIRouter, Request, FastAPI, Query, File, UploadFile
+from fastapi.responses import StreamingResponse, JSONResponse
 from pathlib import Path
 
-def ingest_pdf(pdf_path: str):
-    """
-    Processes a PDF and stores its chunks + embeddings into Chroma.
-    """
-    chunks = process_pdf(pdf_path)
+
+
+from fastapi.middleware.cors import CORSMiddleware
+from apscheduler.schedulers.background import BackgroundScheduler
+from backend.api.core.config import settings
+from backend.api.routes import auth
+from backend.api.routes import knowledge_base
+from backend.api.routes import llm_client
+from backend.services.pdf_parser import PDFParser
+from backend.services.embedder import Embedder
+from backend.services.vector_store import ChromaVectorStore
+from backend.services.rag_query import RAGQueryEngine
+from backend.services.llm_cliet import LLMClient
+from backend.services.db import init_db
+from backend.services.auth import verify_jwt
+from backend.services.rate_limiter import init_rate_limiter, rate_limit
+import asyncio
+
+
+
+# Always resolve the .env path explicitly
+app = FastAPI(title=settings.APP_NAME, debug=settings.DEBUG, version="0.1.0")
+
+@app.on_event("startup")
+async def startup():
+    await init_db()
+    print("✅ Database initialized")
+    await init_rate_limiter()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000", "*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+app.include_router(auth.router)
+app.include_router(llm_client.router)
+app.include_router(knowledge_base.router)
+
+# === Service Instances ===
+services = {
+    "parser" : PDFParser(),
+    "embedder" : Embedder(),
+    "store" : ChromaVectorStore(),
+    "llm" : LLMClient(),
+    "rag_engine" : RAGQueryEngine()
+}
+
+app.state.services = services
+app.state.settings = settings
+
+@app.get("/")
+def root():
+    return {"message": "Hephaestus RAG API is running 🚀"}
+
     
+# === Scheduled PDF Processor ===
+def process_pending_pdfs():
+    print("🕒 Scanning for unprocessed PDFs...")
+    
+    try:
+        print(f"📄 Processing pending files")
+        data = services["parser"].process_pending_pdfs()
 
-    embedder = Embedder()
-    embeddings = embedder.embed_texts(chunks)
+      
+        print(f"✅ processed and moved to for_dispose")
+        print(data)
+    except Exception as e:
+            print(f"❌ Error processing {e}")
 
-    store = ChromaVectorStore()
-    store.add_documents(chunks, embeddings)
+# === Scheduler ===
+scheduler = BackgroundScheduler()
+scheduler.add_job(process_pending_pdfs, "interval", minutes=5)
+scheduler.start()
 
-    print("\n✅ Ingestion complete. File is now part of your vector database.")
-
-
-def ingest_pending_pdfs():
-    porcessed = process_pending_pdfs()
-
-    print("\n✅ Ingestion complete. File is now part of your vector database.")
-    return porcessed
-
-def ask_question(query: str, n_results: int = 3):
-    """
-    Queries the Chroma vector database for similar content.
-    """
-    store = ChromaVectorStore()
-    results = store.query(query, n_results=n_results)
-    return results
-
-
-if __name__ == "__main__":
-    # ---- MENU ----
-    print("📘 RAG Knowledge System")
-    print("1. Ingest new PDF")
-    print("2. Learn from pending PDFs")
-    print("3. Ask a question")
-    choice = input("Select an option (1/2): ").strip()
-
-    if choice == "1":
-        pdf_path = input("\nEnter the path to your PDF: ").strip()
-        if not Path(pdf_path).exists():
-            print("❌ File not found. Please check the path.")
-        else:
-            ingest_pdf(pdf_path)
-
-    elif choice == "3":
-        query = input("\nEnter your question: ").strip()
-        ask_question(query)
-    elif choice == "2":
-        processed = ingest_pending_pdfs()
-        print(f"Processed {processed['number_of_files']} files.")
-        print(f"Embedded {processed['embedded_count']} files.")
-        print(f"Stored {processed['stored_count']} files in vector database.")
-    else:
-        print("⚠️ Invalid choice. Exiting.")
+print("✅ Background scheduler started. Running every 5 minutes.")
