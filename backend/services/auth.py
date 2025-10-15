@@ -1,9 +1,11 @@
 
 
 from datetime import datetime, timedelta
+from fastapi import HTTPException,  Depends, Header
 from backend.models.user import User
 from sqlmodel import Session, select
 from backend.api.core.config import settings
+from backend.services.db import get_session
 from passlib.context import CryptContext
 from jose import jwt
 
@@ -14,11 +16,9 @@ ALGO = settings.JWT_ALGORITHM
 ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES
 
 def hash_password(password: str) -> str:
-
     password_lmtd = password[:72]  # bcrypt limit
-    hashed_password = pwd_context.hash(password_lmtd) #PUTANG INA KAAYO KA NA LINE PROMISE
-    #is_valid = pwd_context.verify(password, hashed_password) 
-    return hashed_password
+    return pwd_context.hash(password_lmtd)
+    
 
 def verify_password(plain: str, hashed: str) -> bool:
     return pwd_context.verify(plain, hashed)
@@ -51,10 +51,31 @@ def register(username: str, email: str,  password: str, session: Session, is_sup
 
     return {"message": "✅ User registered", "user_id": user}
 
-def verify_jwt(token: str):
+async def verify_token(authorization: str = Header(None), session: Session = Depends(get_session)):
+   
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Missing or invalid Authorization header")
+
+    token = authorization.split(" ")[1]
+    username = verify_jwt(token)
+
+    if not username:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+    user = session.exec(select(User).where(User.username == username)).first()
+    if user is None:
+        return None
+    print(user.username, user.is_superuser) 
+    return {
+        "username": user.username,
+        "su": user.is_superuser
+    }
+    # You can return username or a full user object if needed
+    return username
+def verify_jwt(token: str = None):
     try:
         payload = jwt.decode(token, SECRET, algorithms=[ALGO])
         username = payload.get("sub")
+
         if username is None:
             return None
         return username

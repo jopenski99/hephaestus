@@ -1,8 +1,10 @@
 import requests
 import json
+from backend.api.core.config import settings
 class LLMClient:
-    def __init__(self, base_url="http://localhost:11434"):
-        self.base_url = base_url
+    def __init__(self):
+        self.base_url = settings.AI_HOST + ":" + str(settings.AI_PORT)
+        print(f"🔧 LLM Client configured to use {self.base_url}")
 
     def query_llm(self, context: str, question: str) -> str:
         print(f"🔎 Querying LLM with context: “{context}” and question: “{question}”")
@@ -13,7 +15,7 @@ class LLMClient:
 
         response = requests.post(
             self.base_url + "/api/chat",
-            json={"model": "phi3:mini", "messages": messages, "stream": False}
+            json={"model": settings.LLM_MODEL, "messages": messages, "stream": False}
         )
 
         if response.status_code == 200:
@@ -40,7 +42,7 @@ class LLMClient:
 
         with requests.post(
             f"{self.base_url}/api/chat",
-            json={"model": "phi3:mini", "messages": [{"role": "user", "content": prompt}]},
+            json={"model": settings.LLM_MODEL, "messages": [{"role": "user", "content": prompt}]},
             stream=True
         ) as r:
             r.raise_for_status()
