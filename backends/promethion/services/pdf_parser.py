@@ -6,8 +6,8 @@ import pdfplumber
 from pathlib import Path
 from typing import List
 
-from backend.services.embedder import Embedder
-from backend.services.vector_store import ChromaVectorStore
+from promethion.services.embedder import Embedder
+from promethion.services.vector_store import ChromaVectorStore
 
 
 class PDFParser:

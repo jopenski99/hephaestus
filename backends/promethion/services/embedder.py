@@ -5,7 +5,7 @@ import numpy as np
 from sentence_transformers import SentenceTransformer
 from typing import List
 from pathlib import Path
-from backend.api.core.config import settings
+from promethion.api.core.config import settings
 
 class Embedder:
     

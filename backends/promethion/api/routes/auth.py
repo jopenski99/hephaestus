@@ -1,8 +1,9 @@
 from fastapi import APIRouter,  HTTPException,  Depends
-from backend.services.auth import login, register, get_all_users#, reset_all_passwords
 from sqlmodel import Session, select
-from backend.services.db import get_session
-from backend.services.rate_limiter import rate_limit
+
+from promethion.services.db import get_session
+from promethion.services.rate_limiter import rate_limit
+from promethion.services.auth import login, register, get_all_users#, reset_all_passwords
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 

@@ -4,22 +4,20 @@ from fastapi import APIRouter, Request, FastAPI, Query, File, UploadFile
 from fastapi.responses import StreamingResponse, JSONResponse
 from pathlib import Path
 
-
-
 from fastapi.middleware.cors import CORSMiddleware
 from apscheduler.schedulers.background import BackgroundScheduler
-from backend.api.core.config import settings
-from backend.api.routes import auth
-from backend.api.routes import knowledge_base
-from backend.api.routes import llm_client
-from backend.services.pdf_parser import PDFParser
-from backend.services.embedder import Embedder
-from backend.services.vector_store import ChromaVectorStore
-from backend.services.rag_query import RAGQueryEngine
-from backend.services.llm_cliet import LLMClient
-from backend.services.db import init_db
-from backend.services.auth import verify_jwt
-from backend.services.rate_limiter import init_rate_limiter, rate_limit
+from promethion.api.core.config import settings
+from promethion.api.routes import auth
+from promethion.api.routes import knowledge_base
+from promethion.api.routes import llm_client
+from promethion.services.pdf_parser import PDFParser
+from promethion.services.embedder import Embedder
+from promethion.services.vector_store import ChromaVectorStore
+from promethion.services.rag_query import RAGQueryEngine
+from promethion.services.llm_cliet import LLMClient
+from promethion.services.db import init_db
+from promethion.services.auth import verify_jwt
+from promethion.services.rate_limiter import init_rate_limiter, rate_limit
 import asyncio
 
 

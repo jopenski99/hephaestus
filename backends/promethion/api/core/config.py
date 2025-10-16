@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
     # === Directories ===
-    BASE_DIR: Path = Path(__file__).resolve().parent.parent
+    BASE_DIR: Path = Path(__file__).resolve().parent.parent.parent
     DATA_DIR: Path = BASE_DIR / "data"
     UPLOAD_DIR: Path = DATA_DIR / "knowledge_files"
     DISPOSE_DIR: Path = DATA_DIR / "dump"

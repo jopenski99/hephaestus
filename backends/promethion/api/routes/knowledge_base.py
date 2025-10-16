@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Request, UploadFile, File,Depends
+from sqlmodel import Session
+from promethion.services.db import get_session
+from promethion.services.auth import verify_token
+from promethion.api.core.config import settings
+from promethion.services.news import News
 
-from backend.services.db import get_session
-from backend.services.auth import verify_token
-from backend.api.core.config import settings
-from backend.services.news import News
 import shutil
 
 
@@ -22,6 +23,7 @@ async def upload_pdf(file: UploadFile = File(...),user = Depends(verify_token)):
         return {"error": "Only PDF files are supported."}
     
     save_path = settings.UPLOAD_DIR / file.filename
+    print(f"Saving file to: {save_path}")
     with open(save_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
    
@@ -57,15 +59,17 @@ def clear_vector_store(request: Request, user = Depends(verify_token)):
     except Exception as e:
         return {"error": str(e)}
     
-@router.post("/add_news_source")
-def add_news_source(request: Request, name: str, url: str, user = Depends(verify_token)):
+@router.get("/news-update")
+async def news_update(request: Request, user = Depends(verify_token)):
 
     if not user or not user.get("su"):
         return {"error": "Unauthorized piece of shit."}
     
     #try:
     news = News()
-    news.add_source(name, url)
-    return {"message": "✅ Added news source to parser."}
+    results =await news.acquire_news()
+    return {"message": "✅ News updated.", "results": results}
     #except Exception as e:
     #    return {"error": str(e)}
+    
+

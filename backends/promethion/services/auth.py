@@ -1,14 +1,12 @@
-
-
+from jose import jwt
+from passlib.context import CryptContext
 from datetime import datetime, timedelta
 from fastapi import HTTPException,  Depends, Header
-from backend.models.user import User
 from sqlmodel import Session, select
-from backend.api.core.config import settings
-from backend.services.db import get_session
-from passlib.context import CryptContext
-from jose import jwt
 
+from promethion.models.user import User
+from promethion.api.core.config import settings
+from promethion.services.db import get_session
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 SECRET = settings.JWT_SECRET

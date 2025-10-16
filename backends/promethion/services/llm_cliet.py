@@ -1,6 +1,6 @@
 import requests
 import json
-from backend.api.core.config import settings
+from promethion.api.core.config import settings
 class LLMClient:
     def __init__(self):
         self.base_url = settings.AI_HOST + ":" + str(settings.AI_PORT)

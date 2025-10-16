@@ -1,9 +1,10 @@
 import os
 import numpy as np
-from backend.services.vector_store import ChromaVectorStore
 from sentence_transformers import SentenceTransformer
 from dotenv import load_dotenv
 from pathlib import Path
+
+from promethion.services.vector_store import ChromaVectorStore
 
 env_path = Path(__file__).resolve().parent.parent / ".env"
 load_dotenv(env_path)
