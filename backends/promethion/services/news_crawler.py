@@ -4,10 +4,12 @@ from datetime import datetime, timedelta
 from bs4 import BeautifulSoup, Tag
 from typing import Any, List, Dict
 from promethion.services.crawler import CrawlerHandler
+from promethion.services.rag_ingestor import RAGIngestor
 
 class NewsCrawler:
     def __init__(self):
         self.handler = CrawlerHandler()
+        self.ingestor = RAGIngestor()
         self.concurrency = 5
     
     async def crawl_outlet(self, outlet_name: str, base_url: str) -> None:
@@ -63,12 +65,11 @@ class NewsCrawler:
                 print(f"🔗 Fetching: {link}")
                 doc = await self.handler.crawl(link)
                 article_data = self.parse_article_detail(outlet_name, link, doc.html)
-
+                
                 # Optional: push to your RAG or DB
-                # await ingest_document(article_data)
+                await self.ingestor.ingest_article(article_data, category="News")
+                print(f"✅ Processed: {article_data['title']}")
 
-                print(f"✅ Processed: {article_data['title'][:60]}")
-                print(f"   Details: {article_data}")
             except Exception as e:
                 print(f"❌ Error processing {link}: {e}")
 
@@ -83,7 +84,7 @@ class NewsCrawler:
             "content": content_tag.get_text(strip=True) if content_tag else "",
             "url": url,
             "source": outlet_name,
-            "crawled_at": datetime.now().isoformat()
+            "date": datetime.now().isoformat()
         }
 
 async def main():

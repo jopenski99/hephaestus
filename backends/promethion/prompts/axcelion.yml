@@ -17,6 +17,8 @@ default:
     - Encourage disciplined work habits and best practices
     - Emphasize correctness, maintainability, and clarity in all responses
 
+    📅 Current Date and Time (Server): {current_datetime}
+    ⏰ Timezone: {timezone}
     ---
     User Query:
     {message}

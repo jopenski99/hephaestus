@@ -1,12 +1,15 @@
 from fastapi import APIRouter, Request, Query
 from fastapi.responses import StreamingResponse
-
+from promethion.services.rag_query import RAGQueryEngine
 router = APIRouter(prefix="/llm", tags=["LLM"])
 
 @router.get("/test-relevance")
-def test_relevance(request: Request):
-    question = "Where is the toolkit located?"
-    docs = request.app.state.services.rag_engine.query(question, n_results=3)
+def test_relevance():
+    question = "Give me all news today"
+    
+    rag = RAGQueryEngine()
+    
+    docs = rag.query(question=question, n_results=3)
     return {"question": question, "relevant_docs": docs}
 @router.get("/query")
 def query_knowledge(

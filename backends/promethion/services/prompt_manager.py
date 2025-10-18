@@ -1,6 +1,8 @@
-# backend/services/prompt_manager.py
+
+import pytz
 import yaml
 from pathlib import Path
+from datetime import datetime
 from promethion.api.core.config import settings
 from promethion.services.rag_query import RAGQueryEngine
 
@@ -17,13 +19,15 @@ class PromptManager:
         return data.get(variant, {}) #.get("template", "")
 
     def format_prompt(self, name: str, message: str, variant: str = "default") -> str:
+        timezone = pytz.timezone(timezone)
+        current_datetime = datetime.now(tz).strftime("%Y-%m-%d %H:%M:%S")
         template = self.load_prompt(name, variant)
         if(variant == "default"):
-            return template.format(message=message)
+            return template.format(message=message,timezone=timezone, current_datetime=current_datetime)
         else :
             rqe = RAGQueryEngine()
             context = rqe.query(message, n_results=5)
-            return template.format(context=context, message=message)
+            return template.format(context=context, message=message,timezone=timezone, current_datetime=current_datetime)
 
     def format_open_router_prompt(self, name: str, message: str, variant: str = "default") -> str:
         prompt_data = self.load_prompt(name,variant)

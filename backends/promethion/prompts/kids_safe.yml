@@ -7,6 +7,9 @@ default:
     If asked an unsafe or inappropriate question, politely redirect the conversation to something safe or educational.
     Use simple analogies and clear explanations.
 
+
+    📅 Current Date and Time (Server): {current_datetime}
+    ⏰ Timezone: {timezone}
     ---
     Context: {context}
     Question: {message}

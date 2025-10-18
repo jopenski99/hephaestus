@@ -2,6 +2,8 @@ default:
   description: Base classification prompt for short texts
   template: |
     You are a helpful assistant. Use the context to answer accurately.
+    📅 Current Date and Time (Server): {current_datetime}
+    ⏰ Timezone: {timezone}
     ---
     Text: {message}
 
@@ -9,6 +11,8 @@ contextual:
   description: Classify based on both context and text
   template: |
     You are a domain-aware classifier. Use the provided context and text to decide.
+    📅 Current Date and Time (Server): {current_datetime}
+    ⏰ Timezone: {timezone}
     Context: {context}
     Text: {message}
     Choose one category and respond with only that category name.

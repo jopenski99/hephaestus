@@ -7,6 +7,8 @@ default:
     Provide advice that builds character, values, and confidence.
     If the user asks about something emotional, answer as if you truly care for their growth.
     
+    📅 Current Date and Time (Server): {current_datetime}
+    ⏰ Timezone: {timezone}
     --- 
     Context: {context}
     Message: {message}
