@@ -39,7 +39,7 @@ async def immediate_process(request: Request, user = Depends(verify_token)):
             return {"error": "Unauthorized piece of shit."}
         
         try:
-            data = request.app.state.services['parser'].process_pending_pdfs()
+            data = await request.app.state.services['parser'].process_pending_pdfs()
             return {
                 "message": "✅ Processed pending PDFs and moved to for_dispose.",
                 "data": data
@@ -67,7 +67,7 @@ async def news_update(request: Request, user = Depends(verify_token)):
     
     #try:
     news = News()
-    results =await news.acquire_news()
+    results = await news.acquire_news()
     return {"message": "✅ News updated.", "results": results}
     #except Exception as e:
     #    return {"error": str(e)}

@@ -14,9 +14,8 @@ from promethion.services.pdf_parser import PDFParser
 from promethion.services.embedder import Embedder
 from promethion.services.vector_store import ChromaVectorStore
 from promethion.services.rag_query import RAGQueryEngine
-from promethion.services.llm_cliet import LLMClient
+from promethion.services.llm_client import LLMClient
 from promethion.services.db import init_db
-from promethion.services.auth import verify_jwt
 from promethion.services.rate_limiter import init_rate_limiter, rate_limit
 import asyncio
 
@@ -49,7 +48,6 @@ services = {
     "parser" : PDFParser(),
     "embedder" : Embedder(),
     "store" : ChromaVectorStore(),
-    "llm" : LLMClient(),
     "rag_engine" : RAGQueryEngine()
 }
 
@@ -60,7 +58,20 @@ app.state.settings = settings
 def root():
     return {"message": "Hephaestus RAG API is running 🚀"}
 
-    
+@app.get("/health")
+def health_check():
+    return {"status": "healthy"}
+
+@app.get("/test_llm")
+async def test_llm():
+    from promethion.services.classifier import GeneralClassifier
+    classifier = GeneralClassifier()
+    text = "THE DAVAO City Police Office (DCPO) has been recognized as the top-performing unit among all commands under the  Police Regional Office XI for September 2025, according to the official Unit Performance Evaluation Rating (SUPER).\n\nThe consistent achievement is credited to the dynamic leadership of acting city director Colonel Mannan C. Muarip, and the DCPO’s guiding philosophy: the D.A.V.A.O. framework, which stands for Discipline, Action, Virtue, Accountability, and Order.\n\nMuarip lauded the unwavering dedication and personal sacrifices made by the men and women of the DCPO. He noted that their tireless efforts to uphold law, order, and public safety are a powerful testament to their commitment to duty.\n\n“DCPO continues to set the benchmark for outstanding police service,” the statement read, affirming that the D.A.V.A.O. Framework serves as Muarip’s “guiding mantra in leading the organization toward excellence.”\n\nThis accomplishment was not solely due to the police force’s efforts. The DCPO also acknowledged the strong support from the Local Government Unit of Davao City, the active cooperation of barangay officials, and the collective participation of the community.\n\nThe DCPO remains committed to maintaining its status as the “home of disciplined, committed, and service-oriented police officers” as they work together to ensure the continued peace and safety of all Davaoeños."
+    response = classifier.classify(text=text)
+    return {"response": response}
+
+if __name__ == "__main__":
+    asyncio.run(test_llm())
 # === Scheduled PDF Processor ===
 def process_pending_pdfs():
     print("🕒 Scanning for unprocessed PDFs...")
@@ -76,8 +87,11 @@ def process_pending_pdfs():
             print(f"❌ Error processing {e}")
 
 # === Scheduler ===
+""" async def process_pending_pdfs_as_await():
+    await services["parser"].process_pending_pdfs(auto_embed=True)
+
 scheduler = BackgroundScheduler()
-scheduler.add_job(process_pending_pdfs, "interval", minutes=5)
-scheduler.start()
+scheduler.add_job(process_pending_pdfs_as_await, "interval", minutes=5)
+scheduler.start() """
 
 print("✅ Background scheduler started. Running every 5 minutes.")

@@ -2,18 +2,22 @@ import os
 import re
 import shutil
 import pdfplumber
-
+from datetime import datetime
 from pathlib import Path
 from typing import List
 
+from promethion.api.core.config import settings
 from promethion.services.embedder import Embedder
 from promethion.services.vector_store import ChromaVectorStore
-
+from promethion.services.classifier import GeneralClassifier
+from promethion.services.rag_ingestor import RAGIngestor
 
 class PDFParser:
     def __init__(self):
         self.vector_store = ChromaVectorStore()
         self.embedder = Embedder()
+        self.classifier = GeneralClassifier()
+        self.ingestor = RAGIngestor()
 
     def extract_text_from_pdf(self, pdf_path: str) -> str:
         """Extract all selectable text from a PDF."""
@@ -59,7 +63,7 @@ class PDFParser:
         print(f"✅ Extracted {len(chunks)} chunks from {Path(pdf_path).name}")
 
         # Move processed file to dump dir
-        dump_dir = Path(__file__).resolve().parent.parent / "data" / "dump"
+        dump_dir = settings.DISPOSE_DIR
         dump_dir.mkdir(parents=True, exist_ok=True)
 
         destination = dump_dir / Path(pdf_path).name
@@ -68,13 +72,10 @@ class PDFParser:
 
         return chunks
 
-    def process_pending_pdfs(self, auto_embed: bool = True) -> None:
+    async def process_pending_pdfs(self, auto_embed: bool = True) -> None:
         """Check knowledge_files folder and process any new PDFs."""
-        base_dir = Path(__file__).resolve().parent.parent
-        knowledge_files_path = base_dir / "data" / "knowledge_files"
-        knowledge_files_path.mkdir(parents=True, exist_ok=True)
-
-        pdf_files = [f for f in knowledge_files_path.glob("*.pdf")]
+        knowledge_dir = settings.UPLOAD_DIR
+        pdf_files = [f for f in knowledge_dir.glob("*.pdf")]
         number_of_files = len(pdf_files)
         embedded_count = 0
         stored_count = 0
@@ -84,18 +85,44 @@ class PDFParser:
             return
 
         print(f"📚 Found {number_of_files} PDFs to process.")
+
         for file in pdf_files:
             try:
                 chunks = self.process_pdf(str(file))
-                if auto_embed:
-                    embeddings = self.embedder.embed_texts(chunks)
-                    embedded_count += 1
-                    self.vector_store.add_documents(chunks, embeddings)
-                    stored_count += 1
+                if not chunks:
+                    print(f"⚠️ No text extracted from {file.name}")
+                    continue
+
+                # 🧠 Sample and classify a few chunks only
+                sampled_chunks = self.sample_chunks_for_classification(chunks, n_samples=5)
+                sample_text = " ".join(sampled_chunks)[:3000]
+                ai_says = self.classifier.classify(sample_text)
+                # 🧩 Prepare article-style payload
+                article = {
+                    "title": Path(file).stem,
+                    "content": " ".join(chunks),
+                    "source": "Knowledge PDF",
+                    "url": str(file),
+                    "date": str(datetime.utcnow().date())
+                }
+               
+                # 🚀 Ingest into vector store (reuses your existing chunking and embedding logic)
+                await self.ingestor.ingest_article(article, category=ai_says['category'])
+
+                embedded_count += 1
+                stored_count += 1
+
             except Exception as e:
                 print(f"❌ Error processing {file.name}: {e}")
 
         print(f"✅ Process complete. Embedded: {embedded_count}, Stored: {stored_count}")
+
+    def sample_chunks_for_classification(self, chunks: List[str], n_samples: int = 5) -> List[str]:
+        """Sample a few representative chunks across the document for classification."""
+        if len(chunks) <= n_samples:
+            return chunks
+        step = len(chunks) // n_samples
+        return [chunks[i] for i in range(0, len(chunks), step)][:n_samples]
 
 
 if __name__ == "__main__":

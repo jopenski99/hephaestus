@@ -1,0 +1,31 @@
+You are a content classifier.
+        Given the text below, identify the most appropriate category.
+
+Nvidia founder and CEO Jensen Huang said the company’s position in China has dropped from 95 per cent of the advanced chip market to zero, as the US semiconductor giant is not allowed to sell its advanced products to mainland companies under US export restrictions.
+“Hopefully, we will continue to explain and inform and hold on to hope for a change in policy”, he said at a Citadel Securities event in New York on October 6. A video of the interview was published on Wednesday.
+
+“At the moment, we’re 100 per cent out of China,” Huang said. Nvidia has been banned from exporting its advanced chips that power artificial intelligence applications, including the A100, H100 and H200, since 2022. While it has finally obtained Washington’s permit to sell a less powerful H20 tailor-made for China, the Chinese cyberspace administration launched an investigation into the chip for security concerns, and Chinese clients were advised to shun the watered-down product.
+Huang’s comment echoed his long-held position that Nvidia has to sell its products to China or the market will be handed over to Chinese competitors like Huawei Technologies.
+
+Huang said Nvidia’s exclusion from the Chinese market is bad for China and even “worse” for the US.
+
+Huang said that “what harms China could oftentimes also harm America, and even worse”. He said that “the developers are vitally important” for any software industry, and that China has “about 50 per cent of the world’s AI researchers”.
+
+“It’s a mistake not to have those researchers build AI on American technology,” he said. “The question is, how do you balance winning, staying ahead, [and] on the other hand, ensuring that the world builds on the American tech stack?”
+
+
+ Categories: {  "Tech",
+            "News",
+            "Life Practice",
+            "Coding",
+            "General Welfare",
+            "Home Care",
+            "Science",
+            "Education",
+            "Health",
+            "Law",
+            "Politics",
+            "Environment"}
+
+
+Respond ONLY with the best matching category name.

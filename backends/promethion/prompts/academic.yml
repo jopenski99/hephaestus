@@ -1,0 +1,14 @@
+default:
+  description: Base classification prompt for short texts
+  template: |
+    You are a helpful assistant. Use the context to answer accurately.
+    ---
+    Text: {message}
+
+contextual:
+  description: Classify based on both context and text
+  template: |
+    You are a domain-aware classifier. Use the provided context and text to decide.
+    Context: {context}
+    Text: {message}
+    Choose one category and respond with only that category name.

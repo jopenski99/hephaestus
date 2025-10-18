@@ -16,7 +16,7 @@ class News:
         nc = NewsCrawler()
         results = []
         for source in news_source:
-            articles = await nc.crawl_news(source["name"], source["url"])
+            articles = await nc.crawl_outlet(source["name"], source["url"])
             results.append(articles)
         return results
 

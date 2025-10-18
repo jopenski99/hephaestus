@@ -5,15 +5,11 @@ from dotenv import load_dotenv
 from pathlib import Path
 
 from promethion.services.vector_store import ChromaVectorStore
+from promethion.api.core.config import settings
 
-env_path = Path(__file__).resolve().parent.parent / ".env"
-load_dotenv(env_path)
 class RAGQueryEngine:
     def __init__(self):
-        
-        
-        model_name = os.getenv("EMBEDDER_MODEL_NAME")
-        print("🚀 Initializing RAG Query Engine...")
+        model_name = settings.EMBEDDER_NAME
         self.embedder = SentenceTransformer(model_name)
         self.store = ChromaVectorStore()
 
