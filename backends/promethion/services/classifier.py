@@ -64,7 +64,7 @@ class GeneralClassifier:
             print(f"❌ Classification failed: {e}")
             return "Unknown"
 
-    def classify(self, text: str) -> Dict[str, str]:
+    def classify(self, text: str, variant: str = "default") -> Dict[str, str]:
         
         text = text.strip()
         model = settings.CLASSIFIER_NAME 
@@ -73,7 +73,7 @@ class GeneralClassifier:
         port = settings.CLASSIFIER_PORT
         
         llm = LLMHandler(model=model, base_url=base_url, api_key=api_key, port=port)
-        category = llm.handleLLM(text)
+        category = llm.handleLLM(text,"classification",None,variant)
         
         return {"category": category}
     def list_categories(self) -> List[str]:

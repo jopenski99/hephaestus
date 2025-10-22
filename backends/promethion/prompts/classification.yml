@@ -1,4 +1,16 @@
 default:
+  description: Classify based on both context and text
+  config:
+    temperature: 0.35
+    max_tokens: 1400
+    style: "formal, analytical, composed"
+  template: |
+    You are a domain-aware classifier. Use the provided context and text to decide.
+    Context: {context}
+    Text: {message}
+    Choose one category and respond with only that category name.
+
+open-router:
   system: |
     You are a helpful AI classifier. Your task is to categorize the given text into one of these categories:
     - Life Practice
@@ -9,15 +21,6 @@ default:
     - Home Care
     
     Respond with only the category name.
-
   user: |
     Text to classify: 
-    "{messages}"
-
-contextual:
-  description: Classify based on both context and text
-  template: |
-    You are a domain-aware classifier. Use the provided context and text to decide.
-    Context: {context}
-    Text: {message}
-    Choose one category and respond with only that category name.
+    {messages}

@@ -6,13 +6,14 @@ default:
     ⏰ Timezone: {timezone}
     ---
     Text: {message}
-
-contextual:
-  description: Classify based on both context and text
-  template: |
-    You are a domain-aware classifier. Use the provided context and text to decide.
+    Context: {context}
+open-router:
+  system: |
+    You are a helpful assistant. Use the context to answer accurately.
     📅 Current Date and Time (Server): {current_datetime}
     ⏰ Timezone: {timezone}
+    ---
+    
     Context: {context}
+  user: |
     Text: {message}
-    Choose one category and respond with only that category name.

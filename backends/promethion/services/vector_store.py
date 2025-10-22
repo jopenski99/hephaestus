@@ -18,12 +18,12 @@ class ChromaVectorStore:
         #print(f"📦 Chroma Persistent DB initialized at: {db_path}")
 
         # Use consistent collection name
-        self.collection = self.client.get_or_create_collection(name="mpnet-embeddings")
+        self.collection = self.client.get_or_create_collection(name="akashic_records")
         print(f"📦 Using collection: {self.collection.name}")
     def clear_collection(self):
         """Deletes all documents in the collection."""
-        self.client.delete_collection(name="mpnet-embeddings")
-        self.collection = self.client.get_or_create_collection(name="mpnet-embeddings")
+        self.client.delete_collection(name="akashic_records")
+        self.collection = self.client.get_or_create_collection(name="akashic_records")
         print("🗑️ Cleared all documents from vector store.")
     
     def add_documents(self, texts, embeddings):

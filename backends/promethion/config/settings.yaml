@@ -14,7 +14,7 @@ class Settings(BaseSettings):
 
     # === Models ===
     EMBEDDER_NAME: str = "all-mpnet-base-v2"
-    LLM_NAME: str = "phi3:mini"
+    LLM_NAME: str = "phi3:medium:Q4_K_M"
 
     # === Security ===
     JWT_SECRET: str = "dev_secret_key"

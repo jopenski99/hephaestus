@@ -21,21 +21,36 @@ class LLMClient:
             self.headers = {
                 "Authorization": f"Bearer {self.api_key}",
                 "Content-Type": "application/json",
-                "HTTP-Referer": "http://localhost",   
+                "Referer": "http://localhost",   
                 "X-Title": "HephaestusAI"             
             }
         #print({key: value for key, value in self.__dict__.items()})
 
     def query_llm(self, prompt) -> str:
         """Send a classification or text prompt to the LLM via OpenRouter."""
-
-        payload_obj = {
-            **prompt,
-            "stream": False,
-            "model": self.model
-        }
+         # ✅ Normalize prompt into a payload
+        if isinstance(prompt, str):
+            payload_obj = {
+                "messages": [
+                    {"role": "system", "content": "You are a helpful assistant."},
+                    {"role": "user", "content": prompt}
+                ],
+                "stream": False,
+                "model": self.model
+            }
+        elif isinstance(prompt, dict):
+            # If caller already provides proper structure
+            payload_obj = {
+                **prompt,
+                "stream": False,
+                "model": self.model
+            }
+        else:
+            raise TypeError(f"Unsupported prompt type: {type(prompt)}")
 
         try:
+            print("=" * 60)
+            print("headers: " + str(self.headers))
             response = requests.post(
                 self.base_url,
                 headers=self.headers,
@@ -48,10 +63,13 @@ class LLMClient:
 
             if response.status_code == 200:
                 data = response.json()
-                #print("🔹 Raw Response:", json.dumps(data, indent=2))
+                print("🔹 Raw Response:", json.dumps(data, indent=2))
 
                 # ✅ Extract assistant message properly
-                return data["choices"][0]["message"]["content"].strip()
+                if "choices" in data and data["choices"] and data["choices"][0].get("message"):
+                    return data["choices"][0]["message"]["content"].strip()
+                
+                return data["message"]["content"].strip()
             else:
                 #print("❌ API Error:", response.text)
                 return f"Error from LLM API ({response.status_code}): {response.text}"

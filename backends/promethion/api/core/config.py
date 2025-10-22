@@ -17,14 +17,20 @@ class Settings(BaseSettings):
     # ==== Embedder =======
     EMBEDDER_NAME: str = "all-mpnet-base-v2"
     
+    # ===== TTS ======
+    ROOT_DIR: Path = Path(__file__).resolve().parent.parent.parent 
+    TTS_DIR:Path = ROOT_DIR / "models/piper" 
+    TTS_NAME: str = "en_US-danny-low.onnx"
+    TTS_CONFIG: str = "en_US-danny-low.onnx.json" 
+    
     # ==== LLM =======
     LLM_HOST: str = "http://localhost"
-    LLM_NAME: str = "phi3:mini"
+    LLM_NAME: str = "phi3:medium:Q4_K_M"
     
     # ==== Classifier =======
     CLASSIFIER_URL: str = "https://openrouter.ai/api/v1/chat/completions"
     CLASSIFIER_NAME: str = "meta-llama/llama-3.2-3b-instruct:free"
-    CLASSIFIER_KEY: str = "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"
+    CLASSIFIER_KEY: str = "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"
     CLASSIFIER_PORT: str = ""
     # === Security ===
     JWT_SECRET: str = "dev_secret_key"

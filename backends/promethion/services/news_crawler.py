@@ -16,7 +16,7 @@ class NewsCrawler:
         """Full flow: collect links -> fetch details -> push to RAG."""
         print(f"📰 Crawling {outlet_name} from {base_url}")
         await self.handler.init_crawler()
-
+        
         try:
             # 1️⃣ Fetch page & extract article links
             doc = await self.handler.crawl(base_url)
@@ -30,7 +30,11 @@ class NewsCrawler:
                 self.fetch_and_process_article(outlet_name, link, sem)
                 for link in article_links
             ]
-            await asyncio.gather(*tasks)
+            results = await asyncio.gather(*tasks, return_exceptions=True)
+            articles = []
+            # Filter out failed or None results
+            articles = [r for r in results if r and not isinstance(r, Exception)]
+            return articles
         finally:
             await self.handler.close_crawler()
 
@@ -69,7 +73,7 @@ class NewsCrawler:
                 # Optional: push to your RAG or DB
                 await self.ingestor.ingest_article(article_data, category="News")
                 print(f"✅ Processed: {article_data['title']}")
-
+                return article_data
             except Exception as e:
                 print(f"❌ Error processing {link}: {e}")
 
@@ -84,7 +88,8 @@ class NewsCrawler:
             "content": content_tag.get_text(strip=True) if content_tag else "",
             "url": url,
             "source": outlet_name,
-            "date": datetime.now().isoformat()
+            "date": datetime.now().date().isoformat()
+
         }
 
 async def main():

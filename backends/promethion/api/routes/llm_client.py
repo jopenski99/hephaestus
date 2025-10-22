@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Request, Query
 from fastapi.responses import StreamingResponse
 from promethion.services.rag_query import RAGQueryEngine
+from promethion.services.llm_handler import LLMHandler
 router = APIRouter(prefix="/llm", tags=["LLM"])
 
 @router.get("/test-relevance")
@@ -19,6 +20,7 @@ def query_knowledge(
 ):
     """Query the vector database for relevant information."""
     try:
+        llm = LLMHandler(request.app.state.llm_config)
         docs = request.app.state.services.rag_engine.query(question, n_results)
         context = "\n\n".join(docs)
         answer = request.app.state.services.llm.query_llm(context, question)
